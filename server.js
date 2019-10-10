@@ -1,4 +1,3 @@
-ggggggggggggggggggggggggggggg
 // Built-in Node.js modules
 var fs = require('fs')
 var path = require('path')
