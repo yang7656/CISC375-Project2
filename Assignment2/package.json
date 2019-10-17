@@ -3,13 +3,13 @@
     "version": "0.0.0",
     "description": "Dynamic Web Server using Node JS",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Shijun Yang",
+        "email": "yang7656@stthomas.edu"
     },
     "contributors": [
         {
-            "name": "",
-            "email": ""
+            "name": "Aaron Marshall",
+            "email": "mars9380@stthomas.edu"
         },
         {
             "name": "",
@@ -19,7 +19,7 @@
     "main": "server.js",
     "repository": {
         "type": "git",
-        "url": ""
+        "url": "https://github.com/yang7656/CISC375-Project2"
     },
     "dependencies": {
         "express": "^4.17.1",
