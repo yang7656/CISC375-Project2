@@ -74,54 +74,59 @@ app.get('/year/:selected_year', (req, res) => {
         let response = template;
         
         // modify `response` here
-        db.all("SELECT * FROM Consumption WHERE year = ?", [req.params.selected_year], (err,rows) => {
-            let previousYear = parseInt(req.params.selected_year, 10) - 1;
-            let nextYear = parseInt(req.params.selected_year, 10) + 1;
-            var totalCoal = 0;
-            var totalNaturalGas = 0;
-            var totalNuclear = 0;
-            var totalPetroleum = 0;
-            var totalRenewable = 0;
-            var tableValue = "";
-            for (var i = 0; i < rows.length; i++) {
-                var totalEnergy = 0;
-                totalCoal = totalCoal + rows[i]["coal"];
-                totalNaturalGas = totalNaturalGas + rows[i]["natural_gas"];
-                totalNuclear = totalNuclear + rows[i]["nuclear"];
-                totalPetroleum = totalPetroleum + rows[i]["petroleum"];
-                totalRenewable = totalRenewable + rows[i]["renewable"];
-                totalEnergy = rows[i]["coal"] + rows[i]["natural_gas"] + rows[i]["nuclear"] + rows[i]["petroleum"] + rows[i]["renewable"];
-                tableValue = tableValue + 
-                             "                    <tr>\n" +               
-                             "                        <td>" + rows[i]["state_abbreviation"] + "</td>\n" +
-                             "                        <td>" + rows[i]["coal"] + "</td>\n" +
-                             "                        <td>" + rows[i]["natural_gas"] + "</td>\n" +
-                             "                        <td>" + rows[i]["nuclear"] + "</td>\n" +
-                             "                        <td>" + rows[i]["petroleum"] + "</td>\n" +
-                             "                        <td>" + rows[i]["renewable"] + "</td>\n" +
-                             "                        <td>" + totalEnergy + "</td>\n" +
-                             "                    </tr>\n";
-            }
-            response = response.toString();
-            response = response.replace("US Energy Consumption", req.params.selected_year + " US Energy Consumption");
-            response = response.replace("var year", "var year = " + req.params.selected_year);
-            response = response.replace("coal_count", "coal_count = " + totalCoal);
-            response = response.replace("natural_gas_count", "natural_gas_count = " + totalNaturalGas);
-            response = response.replace("nuclear_count", "nuclear_count = " + totalNuclear);
-            response = response.replace("petroleum_count", "petroleum_count = " + totalPetroleum);
-            response = response.replace("renewable_count", "renewable_count = " + totalRenewable);
-            response = response.replace("National Snapshot", req.params.selected_year + " National Snapshot");
-            response = response.replace("<!-- Data to be inserted here -->", "<!-- Data to be inserted here -->\n" + tableValue.substring(0,tableValue.length-1));
-            if (parseInt(req.params.selected_year, 10) === 1960) {
-                previousYear = previousYear + 1;
-            }
-            if (parseInt(req.params.selected_year, 10) === 2017) {
-                nextYear = nextYear - 1;
-            }
-            response = response.replace('href="">Prev','href="http://localhost:8000/year/'+previousYear+'">Prev');
-            response = response.replace('href="">Next','href="http://localhost:8000/year/'+nextYear+'">Next');
-            WriteHtml(res, response);
-        });
+        if (req.params.selected_year < 1960 || req.params.selected_year > 2017) {
+            Write404ErrorYear(res, req.params.selected_year);
+        }
+        else {
+            db.all("SELECT * FROM Consumption WHERE year = ?", [req.params.selected_year], (err,rows) => {
+                var previousYear = parseInt(req.params.selected_year, 10) - 1;
+                var nextYear = parseInt(req.params.selected_year, 10) + 1;
+                var totalCoal = 0;
+                var totalNaturalGas = 0;
+                var totalNuclear = 0;
+                var totalPetroleum = 0;
+                var totalRenewable = 0;
+                var tableValue = "";
+                for (var i = 0; i < rows.length; i++) {
+                    var totalEnergy = 0;
+                    totalCoal = totalCoal + rows[i]["coal"];
+                    totalNaturalGas = totalNaturalGas + rows[i]["natural_gas"];
+                    totalNuclear = totalNuclear + rows[i]["nuclear"];
+                    totalPetroleum = totalPetroleum + rows[i]["petroleum"];
+                    totalRenewable = totalRenewable + rows[i]["renewable"];
+                    totalEnergy = rows[i]["coal"] + rows[i]["natural_gas"] + rows[i]["nuclear"] + rows[i]["petroleum"] + rows[i]["renewable"];
+                    tableValue = tableValue + 
+                                 "                    <tr>\n" +               
+                                 "                        <td>" + rows[i]["state_abbreviation"] + "</td>\n" +
+                                 "                        <td>" + rows[i]["coal"] + "</td>\n" +
+                                 "                        <td>" + rows[i]["natural_gas"] + "</td>\n" +
+                                 "                        <td>" + rows[i]["nuclear"] + "</td>\n" +
+                                 "                        <td>" + rows[i]["petroleum"] + "</td>\n" +
+                                 "                        <td>" + rows[i]["renewable"] + "</td>\n" +
+                                 "                        <td>" + totalEnergy + "</td>\n" +
+                                 "                    </tr>\n";
+                }
+                response = response.toString();
+                response = response.replace("US Energy Consumption", req.params.selected_year + " US Energy Consumption");
+                response = response.replace("var year", "var year = " + req.params.selected_year);
+                response = response.replace("coal_count", "coal_count = " + totalCoal);
+                response = response.replace("natural_gas_count", "natural_gas_count = " + totalNaturalGas);
+                response = response.replace("nuclear_count", "nuclear_count = " + totalNuclear);
+                response = response.replace("petroleum_count", "petroleum_count = " + totalPetroleum);
+                response = response.replace("renewable_count", "renewable_count = " + totalRenewable);
+                response = response.replace("National Snapshot", req.params.selected_year + " National Snapshot");
+                response = response.replace("<!-- Data to be inserted here -->", "<!-- Data to be inserted here -->\n" + tableValue.substring(0,tableValue.length-1));
+                if (parseInt(req.params.selected_year, 10) === 1960) {
+                    previousYear = previousYear + 1;
+                }
+                if (parseInt(req.params.selected_year, 10) === 2017) {
+                    nextYear = nextYear - 1;
+                }
+                response = response.replace('href="">Prev','href="http://localhost:8000/year/'+previousYear+'">Prev');
+                response = response.replace('href="">Next','href="http://localhost:8000/year/'+nextYear+'">Next');
+                WriteHtml(res, response);
+            });
+        }
     }).catch((err) => {
         Write404Error(res);
     });
@@ -133,6 +138,7 @@ app.get('/state/:selected_state', (req, res) => {
         let response = template;
         
         // modify `response` here
+        
         db.all("SELECT * FROM Consumption WHERE state_abbreviation = ?", [req.params.selected_state], (err,rows) => {
             var coal = [];
             var naturalGas = [];
@@ -140,7 +146,7 @@ app.get('/state/:selected_state', (req, res) => {
             var petroleum = [];
             var renewable = [];
             var tableValue = "";
-            for (var i = 0; i < rows.length; i++){
+            for (let i = 0; i < rows.length; i++){
                 var totalEnergy = 0;
                 coal[i] = rows[i]["coal"];
                 naturalGas[i] = rows[i]["natural_gas"];
@@ -159,38 +165,42 @@ app.get('/state/:selected_state', (req, res) => {
                              "                        <td>" + totalEnergy + "</td>\n" +
                              "                    </tr>\n";
             }
-            db.all("SELECT * FROM States ORDER BY state_abbreviation", (err,rows) => {
-                let states = [];
-                for (let i = 0; i < rows.length; i++) {
-                states[i] = rows[i]["state_abbreviation"]; 
-                }
+            db.all("SELECT * FROM States ORDER BY state_abbreviation", (err,StatesName) => {
+                var fullNameOfState = "";
                 var currentState;
-                for (let i = 0; i < states.length; i++) {
-                    if (req.params.selected_state == states[i]) {
-                        currentState = i;
+                for (let j = 0; j < StatesName.length; j++) {
+                    if (StatesName[j]["state_abbreviation"] === req.params.selected_state) {
+                        fullNameOfState = StatesName[j]["state_name"]
+                        currentState = j;
                     }
                 }
-                var nextState = currentState + 1;
-                var prevState = currentState - 1;
-                if (currentState == 0) {
-                    prevState = 50;
+                if (fullNameOfState === "") {
+                    Write404ErrorState(res, req.params.selected_state);
                 }
-                if (currentState == 50) {
-                    nextState = 0;
+                else {
+                    var nextState = currentState + 1;
+                    var prevState = currentState - 1;
+                    if (currentState == 0) {
+                        prevState = 50;
+                    }
+                    if (currentState == 50) {
+                        nextState = 0;
+                    }
+                    response = response.toString();
+                    response = response.replace("US Energy Consumption", req.params.selected_state + " Energy Consumption");
+                    response = response.replace("var state", "var state = " + "'" + req.params.selected_state + "'");
+                    response = response.replace("var coal_counts", "var coal_counts = [" + coal + "]");
+                    response = response.replace("var natural_gas_counts", "var natural_gas_counts = [" + naturalGas + "]");
+                    response = response.replace("var nuclear_counts", "var nuclear_counts = [" + nuclear + "]");
+                    response = response.replace("var petroleum_counts", "var petroleum_counts = [" + petroleum + "]");
+                    response = response.replace("var renewable_counts", "var renewable_counts = [" + renewable + "]");
+                    response = response.replace("Yearly Snapshot", fullNameOfState + " Yearly Snapshot");
+                    response = response.replace('href="">XX</a> <!-- change XX to prev state','href="http://localhost:8000/state/'+StatesName[prevState]["state_abbreviation"]+'">'+ StatesName[prevState]["state_abbreviation"] + '</a> <!-- change XX to prev state');
+                    response = response.replace('href="">XX</a> <!-- change XX to next state','href="http://localhost:8000/state/'+StatesName[nextState]["state_abbreviation"]+'">'+ StatesName[nextState]["state_abbreviation"] + '</a> <!-- change XX to next state');
+                    response = response.replace('<img src="/images/noimage.jpg" alt="No Image"', '<img src="/images/' + req.params.selected_state + '.jpg"' + ' alt="' + req.params.selected_state + '"');
+                    response = response.replace("<!-- Data to be inserted here -->", "<!-- Data to be inserted here -->\n" + tableValue.substring(0,tableValue.length-1));
+                    WriteHtml(res, response);
                 }
-                response = response.toString();
-                response = response.replace("US Energy Consumption", req.params.selected_state + " Energy Consumption");
-                response = response.replace("var state", "var state = " + "'" + req.params.selected_state + "'");
-                response = response.replace("var coal_counts", "var coal_counts = [" + coal + "]");
-                response = response.replace("var natural_gas_counts", "var natural_gas_counts = [" + naturalGas + "]");
-                response = response.replace("var nuclear_counts", "var nuclear_counts = [" + nuclear + "]");
-                response = response.replace("var petroleum_counts", "var petroleum_counts = [" + petroleum + "]");
-                response = response.replace("var renewable_counts", "var renewable_counts = [" + renewable + "]");
-                response = response.replace("Yearly Snapshot", req.params.selected_state + " Yearly Snapshot");
-                response = response.replace('href="">XX</a> <!-- change XX to prev state','href="http://localhost:8000/state/'+states[prevState]+'">'+ states[prevState] + '</a> <!-- change XX to prev state');
-                response = response.replace('href="">XX</a> <!-- change XX to next state','href="http://localhost:8000/state/'+states[nextState]+'">'+ states[nextState] + '</a> <!-- change XX to next state');
-                response = response.replace("<!-- Data to be inserted here -->", "<!-- Data to be inserted here -->\n" + tableValue.substring(0,tableValue.length-1));
-                WriteHtml(res, response);
             }); 
         });
     }).catch((err) => {
@@ -236,34 +246,41 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
                 for (let i = 2; i < rows.length; i++) {
                     energyList[i-2] = rows[i]["name"];
                 }
-                var currentEnergyIndex;
+                var currentEnergyIndex = -1;
                 for (let i = 0; i < energyList.length; i++) {
                     if (req.params.selected_energy_type == energyList[i]) {
                         currentEnergyIndex = i
                     }
                 }
-                var nextEnergyIndex = currentEnergyIndex + 1;
-                var prevEnergyIndex = currentEnergyIndex - 1;
-                if (currentEnergyIndex == (energyList.length - 1)) {
-                    nextEnergyIndex = 0;
+                if (currentEnergyIndex === -1) {
+                    Write404ErrorEnergy(res,req.params.selected_energy_type);
                 }
-                if (currentEnergyIndex == 0) {
-                    prevEnergyIndex = energyList.length - 1;
-                }
-                var nextEnergyStr = energyList[nextEnergyIndex];
-                var prevEnergyStr = energyList[prevEnergyIndex];
-                nextEnergyStr = nextEnergyStr.replace("_"," ");
-                prevEnergyStr = prevEnergyStr.replace("_"," ");
+                else {
+                    var nextEnergyIndex = currentEnergyIndex + 1;
+                    var prevEnergyIndex = currentEnergyIndex - 1;
+                    if (currentEnergyIndex == (energyList.length - 1)) {
+                        nextEnergyIndex = 0;
+                    }
+                
+                    if (currentEnergyIndex == 0) {
+                        prevEnergyIndex = energyList.length - 1;
+                    }
+                    var nextEnergyStr = energyList[nextEnergyIndex];
+                    var prevEnergyStr = energyList[prevEnergyIndex];
+                    nextEnergyStr = nextEnergyStr.replace("_"," ");
+                    prevEnergyStr = prevEnergyStr.replace("_"," ");
 
-                response = response.toString();
-                response = response.replace("US Energy Consumption", "US " + energyType + " Consumption");
-                response = response.replace("var energy_counts", "var energy_counts = " + JSON.stringify(energyCounts));
-                response = response.replace("var energy_type", "var energy_type = '" + energyType + "'");
-                response = response.replace("Consumption Snapshot", energyType + " Consumption Snapshot");
-                response = response.replace('href="">XX</a> <!-- change XX to prev energy type', "href='http://localhost:8000/energy-type/"+energyList[prevEnergyIndex]+"'>" + prevEnergyStr +"</a> <!-- change XX to prev energy type");
-                response = response.replace('href="">XX</a> <!-- change XX to next energy type', "href='http://localhost:8000/energy-type/"+energyList[nextEnergyIndex]+"'>" + nextEnergyStr +"</a> <!-- change XX to next energy type");
-                response = response.replace("<!-- Data to be inserted here -->", tableValue);
-                WriteHtml(res, response);
+                    response = response.toString();
+                    response = response.replace("US Energy Consumption", "US " + energyType + " Consumption");
+                    response = response.replace("var energy_counts", "var energy_counts = " + JSON.stringify(energyCounts));
+                    response = response.replace("var energy_type", "var energy_type = '" + energyType + "'");
+                    response = response.replace("Consumption Snapshot", energyType + " Consumption Snapshot");
+                    response = response.replace('href="">XX</a> <!-- change XX to prev energy type', "href='http://localhost:8000/energy-type/"+energyList[prevEnergyIndex]+"'>" + prevEnergyStr +"</a> <!-- change XX to prev energy type");
+                    response = response.replace('href="">XX</a> <!-- change XX to next energy type', "href='http://localhost:8000/energy-type/"+energyList[nextEnergyIndex]+"'>" + nextEnergyStr +"</a> <!-- change XX to next energy type");
+                    response = response.replace('<img src="/images/noimage.jpg" alt="No Image"', '<img src="/images/' + req.params.selected_energy_type + '.jpg" alt="' + req.params.selected_energy_type + '"');
+                    response = response.replace("<!-- Data to be inserted here -->", tableValue);
+                    WriteHtml(res, response);
+                }
             });
         });
     }).catch((err) => {
@@ -282,6 +299,24 @@ function ReadFile(filename) {
             }
         });
     });
+}
+
+function Write404ErrorYear(res, year) {
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    res.write('Error: no data for year ' + year + '.');
+    res.end();
+}
+
+function Write404ErrorState(res, state) {
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    res.write('Error: no data for state ' + state + '.');
+    res.end();
+}
+
+function Write404ErrorEnergy(res, type) {
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    res.write('Error: no data for energy type of ' + type + '.');
+    res.end();
 }
 
 function Write404Error(res) {
