@@ -139,7 +139,7 @@ app.get('/state/:selected_state', (req, res) => {
         
         // modify `response` here
         
-        db.all("SELECT * FROM Consumption WHERE state_abbreviation = ?", [req.params.selected_state], (err,rows) => {
+        db.all("SELECT * FROM Consumption WHERE state_abbreviation = ? ORDER BY year", [req.params.selected_state], (err,rows) => {
             var coal = [];
             var naturalGas = [];
             var nuclear = [];
@@ -214,7 +214,7 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
         let response = template;
         // modify `response` here
 
-        db.all("SELECT * FROM Consumption ORDER BY state_abbreviation", (err,rows) => {
+        db.all("SELECT * FROM Consumption ORDER BY state_abbreviation, year", (err,rows) => {
             var energyCounts = {};
             for (let i = 0; i < rows.length; i++) {
                 var stateKey = rows[i]["state_abbreviation"];
