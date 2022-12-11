@@ -22,7 +22,7 @@
         "url": "https://github.com/yang7656/CISC375-Project2"
     },
     "dependencies": {
-        "express": "^4.17.1",
+        "express": "^4.17.3",
         "sqlite3": "^4.1.0"
     }
 }
